@@ -71,22 +71,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Skip deploy (no kubeconfig)
-        if: ${{ secrets.KUBECONFIG == '' }}
-        run: echo "KUBECONFIG secret not set; skipping deploy."
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
       - name: Set up kubectl
-        if: ${{ secrets.KUBECONFIG != '' }}
         uses: azure/setup-kubectl@v3
         with:
           version: "v1.30.0"
-      - name: Write kubeconfig
-        if: ${{ secrets.KUBECONFIG != '' }}
-        run: |
-          printf '%s' "${{ secrets.KUBECONFIG }}" > "$RUNNER_TEMP/kubeconfig"
+      - name: Build image for kind
+        run: docker build -t task-api:latest .
+      - name: Load image into kind
+        run: kind load docker-image task-api:latest
       - name: Deploy to Kubernetes
-        if: ${{ secrets.KUBECONFIG != '' }}
-        env:
-          KUBECONFIG: ${{ runner.temp }}/kubeconfig
         run: |
           kubectl apply -f k8s
           kubectl rollout status deployment/task-api --timeout=120s
+      - name: Smoke test service
+        run: |
+          kubectl wait --for=condition=available deployment/task-api --timeout=120s
+          kubectl port-forward deployment/task-api 18080:8000 > /dev/null 2>&1 &
+          PORT_FORWARD_PID=$!
+          sleep 3
+          curl -sSf http://127.0.0.1:18080/health
+          kill $PORT_FORWARD_PID
