@@ -24,7 +24,7 @@ Repositorio GitHub
 │ ├── Docker image
 │ └── Deploy a Kubernetes
 │
-└── Kubernetes (Minikube)
+└── Kubernetes (Kind)
 
 🧪 Funcionalidad mínima de la app (NO compliques esto)
 
