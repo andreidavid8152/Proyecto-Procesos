@@ -68,18 +68,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: docker
-    if: ${{ secrets.KUBECONFIG != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Skip deploy (no kubeconfig)
+        if: ${{ secrets.KUBECONFIG == '' }}
+        run: echo "KUBECONFIG secret not set; skipping deploy."
       - name: Set up kubectl
+        if: ${{ secrets.KUBECONFIG != '' }}
         uses: azure/setup-kubectl@v3
         with:
           version: "v1.30.0"
       - name: Write kubeconfig
+        if: ${{ secrets.KUBECONFIG != '' }}
         run: |
           printf '%s' "${{ secrets.KUBECONFIG }}" > "$RUNNER_TEMP/kubeconfig"
       - name: Deploy to Kubernetes
+        if: ${{ secrets.KUBECONFIG != '' }}
         env:
           KUBECONFIG: ${{ runner.temp }}/kubeconfig
         run: |
