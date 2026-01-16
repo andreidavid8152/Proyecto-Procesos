@@ -1,0 +1,37 @@
+Desarrollar una API REST mínima (gestion de tareas) y construir un pipeline CI/CD con enfoque DevSecOps que:
+
+Construya la app
+
+Ejecute pruebas
+
+Analice seguridad
+
+Genere imagen Docker
+
+Despliegue en Kubernetes
+
+🏗️ Arquitectura simple 
+Repositorio GitHub
+│
+├── FastAPI (API REST)
+│
+├── Docker
+│
+├── GitHub Actions (CI/CD)
+│ ├── Build
+│ ├── Test
+│ ├── SAST (seguridad) | Bandit
+│ ├── Docker image
+│ └── Deploy a Kubernetes
+│
+└── Kubernetes (Minikube)
+
+🧪 Funcionalidad mínima de la app (NO compliques esto)
+
+Ejemplo de endpoints:
+
+GET /health → verifica que el servicio está vivo
+
+GET /tasks → lista de tareas
+
+POST /tasks → crea una tarea
