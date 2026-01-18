@@ -87,7 +87,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build image
-        run: docker build -t task-api:ci .
+        run: docker build -t task-api:latest .
+      - name: Export image artifact
+        run: |
+          mkdir -p artifacts
+          docker save task-api:latest | gzip > artifacts/task-api-image.tar.gz
+          sha256sum artifacts/task-api-image.tar.gz > artifacts/task-api-image.sha256
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: task-api-image
+          path: |
+            artifacts/task-api-image.tar.gz
+            artifacts/task-api-image.sha256
+          if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
@@ -103,8 +116,15 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: "v1.30.0"
-      - name: Build image for kind
-        run: docker build -t task-api:latest .
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: task-api-image
+          path: artifacts
+      - name: Verify image checksum
+        run: sha256sum -c artifacts/task-api-image.sha256
+      - name: Load image into Docker
+        run: gunzip -c artifacts/task-api-image.tar.gz | docker load
       - name: Load image into kind
         run: kind load docker-image task-api:latest
       - name: Deploy to Kubernetes

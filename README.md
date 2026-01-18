@@ -47,7 +47,7 @@ El workflow en `.github/workflows/ci.yml`:
 - Build y tests
 - SAST con Bandit
 - Validacion de politicas (OPA/Conftest) sobre manifiestos Kubernetes
-- Build de imagen Docker
+- Build de imagen Docker y generacion de artefacto (tar.gz + checksum)
 - Deploy a un cluster Kubernetes (kind) dentro del pipeline y smoke test a `/health`
 
 Evidencias:
@@ -55,3 +55,4 @@ Evidencias:
 - Reporte de Pytest (`pytest-report`)
 - Reporte de Bandit (`bandit-report`)
 - Reporte de Conftest (`conftest-policy-report`)
+- Artefacto de imagen Docker y checksum (`task-api-image`)
